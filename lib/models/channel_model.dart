@@ -4,6 +4,8 @@
 
 import 'dart:convert';
 
+import 'package:youtube_api/models/videos.dart';
+
 ChannelInfo channelInfoFromJson(String str) =>
     ChannelInfo.fromJson(json.decode(str));
 
@@ -21,13 +23,17 @@ class ChannelInfo {
   String etag;
   PageInfo pageInfo;
   List<Item> items;
+  List<Video?>? videos;
 
-  factory ChannelInfo.fromJson(Map<String, dynamic> json) => ChannelInfo(
-        kind: json["kind"],
-        etag: json["etag"],
-        pageInfo: PageInfo.fromJson(json["pageInfo"]),
-        items: List<Item>.from(json["items"].map((x) => Item.fromJson(x))),
-      );
+  factory ChannelInfo.fromJson(Map<String, dynamic> json) {
+    
+    return ChannelInfo(
+      kind: json["kind"],
+      etag: json["etag"],
+      pageInfo: PageInfo.fromJson(json["pageInfo"]),
+      items: List<Item>.from(json["items"].map((x) => Item.fromJson(x))),
+    );
+  }
 
   Map<String, dynamic> toJson() => {
         "kind": kind,

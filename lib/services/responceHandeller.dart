@@ -4,10 +4,44 @@ import 'package:youtube_api/keys.dart';
 import 'package:youtube_api/models/channel_model.dart';
 import 'package:http/http.dart' as http;
 import 'package:youtube_api/models/playlist_model.dart';
-import 'package:youtube_api/models/videos_model.dart';
+import 'package:youtube_api/models/videos.dart';
 
 class ResponceHandeller {
-  Future<ChannelInfo> getChannelInfo() async {
+  String _nextPageToken = '';
+
+  Future<List<Video>> getVideosInfo({required String playlistId}) async {
+    final queryParameters = {
+      'part': 'snippet, contentDetails',
+      'playlistId': playlistId,
+      'maxResults': '8',
+      'pageToken': _nextPageToken,
+      'key': Keys.API_KEY,
+    };
+    Uri uri = Uri.https(
+        'youtube.googleapis.com', '/youtube/v3/playlistItems', queryParameters);
+    print(uri);
+    //getiitng playlist videos
+    var responce = await http.get(uri);
+    if (responce.statusCode == 200) {
+      var json = jsonDecode(responce.body);
+
+      _nextPageToken = json['nextPageToken'] ?? '';
+      List<dynamic> videosJson = json['items'];
+
+      //fetching first page videos
+      List<Video> videos = [];
+      videosJson.forEach(
+        (element) => videos.add(
+          Video.fromMap(element['snippet']),
+        ),
+      );
+      return videos;
+    } else {
+      throw jsonDecode(responce.body)['error']['message'];
+    }
+  }
+
+  Future<ChannelInfo> getChannelInfo({required String playlistId}) async {
     final queryParameters = {
       'part': 'contentDetails, snippet, statistics',
       'id': Keys.CHANNEL_ID,
@@ -16,13 +50,21 @@ class ResponceHandeller {
     Uri uri = Uri.https(
         'youtube.googleapis.com', '/youtube/v3/channels', queryParameters);
     final responce = await http.get(uri);
-    final json = jsonDecode(responce.body);
-    return ChannelInfo.fromJson(json);
+    if (responce.statusCode == 200) {
+      final json = jsonDecode(responce.body);
+      ChannelInfo channelInfo = ChannelInfo.fromJson(json);
+
+      channelInfo.videos = await getVideosInfo(playlistId: playlistId);
+      return channelInfo;
+    } else {
+      throw jsonDecode(responce.body)['error']['message'];
+    }
   }
 
   Future<PlaylistInfo> getPlaylistInfo() async {
     final queryParameters = {
       'part': 'id, snippet, contentDetails',
+      'maxResults':'50',
       'channelId': Keys.CHANNEL_ID,
       'key': Keys.API_KEY,
     };
@@ -31,20 +73,6 @@ class ResponceHandeller {
     final responce = await http.get(uri);
     final json = jsonDecode(responce.body);
     return PlaylistInfo.fromJson(json);
-  }
-
-  Future<VideosInfo> getVideosInfo(String playlistId) async {
-    final queryParameters = {
-      'part': 'snippet, contentDetails',
-      'playlistId': playlistId,
-      'key': Keys.API_KEY,
-    };
-    Uri uri = Uri.https(
-        'youtube.googleapis.com', '/youtube/v3/playlistItems', queryParameters);
-    final responce = await http.get(uri);
-    final json = jsonDecode(responce.body);
-
-    return VideosInfo.fromJson(json);
   }
 }
 /**

@@ -1,56 +1,57 @@
 import 'package:flutter/material.dart';
-
-import 'package:youtube_api/models/videos_model.dart';
+import 'package:share/share.dart';
+import 'package:youtube_api/models/channel_model.dart';
+import 'package:youtube_api/models/videos.dart';
 import 'package:youtube_api/services/responceHandeller.dart';
-
 import '../constants.dart';
 
 class VideoPage extends StatefulWidget {
   final String playlistId;
-  const VideoPage({Key? key, required this.playlistId}) : super(key: key);
+  final String videoCount;
+  const VideoPage(
+      {Key? key, required this.playlistId, required this.videoCount})
+      : super(key: key);
 
   @override
   _VideoPageState createState() => _VideoPageState();
 }
 
 class _VideoPageState extends State<VideoPage> {
-  final _responcehandeller = ResponceHandeller();
-  late VideosInfo _responce;
-  late bool _loading;
+  late ChannelInfo _channelInfo;
+  late bool _loding;
+  final _responceHandeller = ResponceHandeller();
+  bool _isLoding = false;
 
-  void getResponce(String playlistId) async {
-    final result = await _responcehandeller.getVideosInfo(playlistId);
+  _initChannel() async {
+    ChannelInfo channelInfo =
+        await _responceHandeller.getChannelInfo(playlistId: widget.playlistId);
     setState(() {
-      _responce = result;
-      _loading = false;
+      _channelInfo = channelInfo;
+      _loding = false;
     });
+  }
+
+  _lodeMoreVideos() async {
+    _isLoding = true;
+    List<Video?> moreVideos =
+        await _responceHandeller.getVideosInfo(playlistId: widget.playlistId);
+    List<Video?> allVideos = _channelInfo.videos!..addAll(moreVideos);
+    setState(() {
+      _channelInfo.videos = allVideos;
+    });
+    _isLoding = false;
   }
 
   @override
   void initState() {
-    _loading = true;
-
-    getResponce(widget.playlistId);
+    _loding = true;
+    // TODO: implement initState
+    _initChannel();
     super.initState();
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: kPrimaryColor,
-      appBar: AppBar(
-        backgroundColor: Colors.red,
-        title: Text('YouTube'),
-      ),
-      body: _loading ? CircularProgressIndicator() : videoBox(_responce),
-    );
-  }
-}
-
-Widget videoBox(VideosInfo _responce) {
-  return ListView.builder(
-    itemCount: _responce.items.length,
-    itemBuilder: (BuildContext context, index) => Column(
+  _buildVideo(Video video) {
+    return Column(
       children: [
         Container(
           height: 110,
@@ -65,7 +66,7 @@ Widget videoBox(VideosInfo _responce) {
                 child: Container(
                   color: kSecondaryColor,
                   child: Image.network(
-                    _responce.items[index].snippet.thumbnails.high.url,
+                    video.thumbnailUrl,
                     fit: BoxFit.cover,
                   ),
                 ),
@@ -85,7 +86,7 @@ Widget videoBox(VideosInfo _responce) {
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           text: TextSpan(
-                            text: _responce.items[index].snippet.title,
+                            text: video.title,
                             style: TextStyle(
                               color: kSecondaryColor,
                               fontSize: 16,
@@ -99,7 +100,7 @@ Widget videoBox(VideosInfo _responce) {
                         height: 5,
                       ),
                       Text(
-                        _responce.items[index].snippet.videoOwnerChannelTitle,
+                        video.channelTitle,
                         textAlign: TextAlign.start,
                         style: TextStyle(fontSize: 12, color: kSecondaryColor),
                       ),
@@ -111,9 +112,12 @@ Widget videoBox(VideosInfo _responce) {
                 alignment: Alignment.topCenter,
                 child: IconButton(
                     alignment: Alignment.topRight,
-                    onPressed: () {},
+                    onPressed: () {
+                      Share.share(
+                          'https://www.youtube.com/watch?v=${video.id}');
+                    },
                     icon: Icon(
-                      Icons.more_vert,
+                      Icons.share,
                       color: kSecondaryColor,
                     )),
               )
@@ -121,6 +125,47 @@ Widget videoBox(VideosInfo _responce) {
           ),
         ),
       ],
-    ),
-  );
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: kPrimaryColor,
+      appBar: AppBar(
+        backgroundColor: Colors.red,
+        title: Text('YouTube'),
+      ),
+      body: _loding
+          ? CircularProgressIndicator()
+          : _channelInfo.videos != null
+              ? NotificationListener<ScrollNotification>(
+                  onNotification: (ScrollNotification scrollDetails) {
+                    if (!_isLoding &&
+                        _channelInfo.videos!.length <=
+                            int.parse(widget.videoCount) - 2 &&
+                        scrollDetails.metrics.pixels ==
+                            scrollDetails.metrics.maxScrollExtent) {
+                      _lodeMoreVideos();
+                    
+                    }
+                    return false;
+                  },
+                  child: ListView.builder(
+                      itemCount: 1 + _channelInfo.videos!.length,
+                      itemBuilder: (BuildContext context, int index) {
+                        if (index == 0) {
+                          return Container();
+                        }
+                        Video? video = _channelInfo.videos![index - 1];
+                        return _buildVideo(video!);
+                      }),
+                )
+              : Center(
+                  child: CircularProgressIndicator(
+                    color: Colors.blue,
+                  ),
+                ),
+    );
+  }
 }

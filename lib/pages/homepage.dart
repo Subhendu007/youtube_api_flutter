@@ -53,7 +53,7 @@ Widget playlistBox(PlaylistInfo _responce) {
             context,
             MaterialPageRoute(
               builder: (context) =>
-                  VideoPage(playlistId: _responce.items[index].id),
+                  VideoPage(playlistId: _responce.items[index].id,videoCount: _responce.items[index].contentDetails.itemCount.toString(),),
             ),
           ),
           child: Container(
@@ -72,13 +72,9 @@ Widget playlistBox(PlaylistInfo _responce) {
                     children: [
                       Container(
                         color: Colors.green,
+                        child: Image.network(_responce.items[index].snippet.thumbnailUrl),
                       ),
-                      Opacity(
-                        opacity: 0.5,
-                        child: Container(
-                          color: Colors.black,
-                        ),
-                      )
+                      
                     ],
                   ),
                 ),

@@ -13,14 +13,14 @@ class VideosInfo {
   VideosInfo({
     required this.kind,
     required this.etag,
-    // required this.nextPageToken,
+    required this.nextPageToken,
     required this.items,
     required this.pageInfo,
   });
 
   String kind;
   String etag;
-  // String nextPageToken;
+  String nextPageToken;
   List<Item> items;
   PageInfo pageInfo;
 
@@ -29,7 +29,7 @@ class VideosInfo {
     return VideosInfo(
       kind: json["kind"],
       etag: json["etag"],
-      // nextPageToken: json["nextPageToken"],
+      nextPageToken: json["nextPageToken"] ?? '',
       items: List<Item>.from(json["items"].map((x) => Item.fromJson(x))),
       pageInfo: PageInfo.fromJson(json["pageInfo"]),
     );
@@ -38,7 +38,7 @@ class VideosInfo {
   Map<String, dynamic> toJson() => {
         "kind": kind,
         "etag": etag,
-        // "nextPageToken": nextPageToken,
+        "nextPageToken": nextPageToken,
         "items": List<dynamic>.from(items.map((x) => x.toJson())),
         "pageInfo": pageInfo.toJson(),
       };

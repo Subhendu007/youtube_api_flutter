@@ -93,6 +93,7 @@ class Snippet {
     required this.description,
     required this.channelTitle,
     required this.localized,
+    required this.thumbnailUrl,
   });
 
   DateTime publishedAt;
@@ -101,6 +102,7 @@ class Snippet {
   String description;
   String channelTitle;
   Localized localized;
+  String thumbnailUrl;
 
   factory Snippet.fromJson(Map<String, dynamic> json) => Snippet(
         publishedAt: DateTime.parse(json["publishedAt"]),
@@ -109,6 +111,7 @@ class Snippet {
         description: json["description"],
         channelTitle: json["channelTitle"],
         localized: Localized.fromJson(json["localized"]),
+       thumbnailUrl: json['thumbnails']['high']['url']??"",
       );
 
   Map<String, dynamic> toJson() => {

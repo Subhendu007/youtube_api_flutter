@@ -44,6 +44,7 @@ class Item {
     required this.id,
     required this.snippet,
     required this.contentDetails,
+    required this.status,
   });
 
   String kind;
@@ -51,6 +52,7 @@ class Item {
   String id;
   Snippet snippet;
   ContentDetails contentDetails;
+  String status;
 
   factory Item.fromJson(Map<String, dynamic> json) => Item(
         kind: json["kind"],
@@ -58,6 +60,7 @@ class Item {
         id: json["id"],
         snippet: Snippet.fromJson(json["snippet"]),
         contentDetails: ContentDetails.fromJson(json["contentDetails"]),
+        status: json['privacyStatus'] ?? '',
       );
 
   Map<String, dynamic> toJson() => {
@@ -104,15 +107,18 @@ class Snippet {
   Localized localized;
   String thumbnailUrl;
 
-  factory Snippet.fromJson(Map<String, dynamic> json) => Snippet(
-        publishedAt: DateTime.parse(json["publishedAt"]),
-        channelId: json["channelId"],
-        title: json["title"],
-        description: json["description"],
-        channelTitle: json["channelTitle"],
-        localized: Localized.fromJson(json["localized"]),
-       thumbnailUrl: json['thumbnails']['high']['url']??"",
-      );
+  factory Snippet.fromJson(Map<String, dynamic> json) {
+    
+    return Snippet(
+      publishedAt: DateTime.parse(json["publishedAt"]),
+      channelId: json["channelId"],
+      title: json["title"],
+      description: json["description"],
+      channelTitle: json["channelTitle"],
+      localized: Localized.fromJson(json["localized"]),
+      thumbnailUrl: json['thumbnails']['high']['url']
+    );
+  }
 
   Map<String, dynamic> toJson() => {
         "publishedAt": publishedAt.toIso8601String(),

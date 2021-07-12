@@ -17,9 +17,9 @@ class VideoPage extends StatefulWidget {
 }
 
 class _VideoPageState extends State<VideoPage> {
+  final _responceHandeller = ResponceHandeller();
   late ChannelInfo _channelInfo;
   late bool _loding;
-  final _responceHandeller = ResponceHandeller();
   bool _isLoding = false;
 
   _initChannel() async {
@@ -45,7 +45,6 @@ class _VideoPageState extends State<VideoPage> {
   @override
   void initState() {
     _loding = true;
-    // TODO: implement initState
     _initChannel();
     super.initState();
   }
@@ -137,8 +136,10 @@ class _VideoPageState extends State<VideoPage> {
         title: Text('YouTube'),
       ),
       body: _loding
-          ? CircularProgressIndicator()
-          : _channelInfo.videos != null
+          ? LinearProgressIndicator(
+              valueColor: AlwaysStoppedAnimation(Colors.red),
+            )
+          : _channelInfo.videos!.length != 0
               ? NotificationListener<ScrollNotification>(
                   onNotification: (ScrollNotification scrollDetails) {
                     if (!_isLoding &&
@@ -146,8 +147,8 @@ class _VideoPageState extends State<VideoPage> {
                             int.parse(widget.videoCount) - 2 &&
                         scrollDetails.metrics.pixels ==
                             scrollDetails.metrics.maxScrollExtent) {
+                      CircularProgressIndicator();
                       _lodeMoreVideos();
-                    
                     }
                     return false;
                   },
@@ -162,8 +163,12 @@ class _VideoPageState extends State<VideoPage> {
                       }),
                 )
               : Center(
-                  child: CircularProgressIndicator(
-                    color: Colors.blue,
+                  child: Text(
+                    'No Videos Found',
+                    style: TextStyle(
+                        fontSize: 20,
+                        fontStyle: FontStyle.italic,
+                        color: Colors.grey),
                   ),
                 ),
     );

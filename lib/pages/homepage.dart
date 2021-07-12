@@ -40,7 +40,13 @@ class _HomePageState extends State<HomePage> {
           backgroundColor: Colors.red,
           title: Text('YouTube'),
         ),
-        body: _loading ? CircularProgressIndicator() : playlistBox(_responce));
+        body: _loading
+            ? Center(
+                child: CircularProgressIndicator(
+                  color: Colors.red,
+                ),
+              )
+            : playlistBox(_responce));
   }
 }
 
@@ -52,8 +58,11 @@ Widget playlistBox(PlaylistInfo _responce) {
           onTap: () => Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) =>
-                  VideoPage(playlistId: _responce.items[index].id,videoCount: _responce.items[index].contentDetails.itemCount.toString(),),
+              builder: (context) => VideoPage(
+                playlistId: _responce.items[index].id,
+                videoCount:
+                    _responce.items[index].contentDetails.itemCount.toString(),
+              ),
             ),
           ),
           child: Container(
@@ -69,12 +78,30 @@ Widget playlistBox(PlaylistInfo _responce) {
               children: [
                 Expanded(
                   child: Stack(
+                    fit: StackFit.expand,
                     children: [
                       Container(
                         color: Colors.green,
-                        child: Image.network(_responce.items[index].snippet.thumbnailUrl),
+                        //child: Image.network(DEFAULT_IMAGE,fit: BoxFit.cover,)
                       ),
-                      
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Container(
+                              color: Colors.transparent,
+                            ),
+                          ),
+                          Expanded(
+                            child: Opacity(
+                              opacity: 0.15,
+                              child: Container(
+                                margin: EdgeInsets.all(2),
+                                color: Colors.black,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ],
                   ),
                 ),

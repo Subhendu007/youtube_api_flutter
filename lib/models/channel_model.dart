@@ -125,21 +125,21 @@ class Snippet {
     required this.title,
     required this.description,
     required this.publishedAt,
-    required this.thumbnails,
+   // required this.thumbnails,
     required this.localized,
   });
 
   String title;
   String description;
   DateTime publishedAt;
-  Thumbnails thumbnails;
+  //Thumbnails thumbnails;
   Localized localized;
 
   factory Snippet.fromJson(Map<String, dynamic> json) => Snippet(
         title: json["title"],
         description: json["description"],
         publishedAt: DateTime.parse(json["publishedAt"]),
-        thumbnails: Thumbnails.fromJson(json["thumbnails"]),
+        //thumbnails: Thumbnails.fromJson(json["thumbnails"]),
         localized: Localized.fromJson(json["localized"]),
       );
 
@@ -147,7 +147,7 @@ class Snippet {
         "title": title,
         "description": description,
         "publishedAt": publishedAt.toIso8601String(),
-        "thumbnails": thumbnails.toJson(),
+        // "thumbnails": thumbnails.toJson(),
         "localized": localized.toJson(),
       };
 }
